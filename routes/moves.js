@@ -1,25 +1,10 @@
 const router = require("express").Router();
 const { prisma } = require("../utils/connect");
+const { verifyToken } = require("../middleware/middleware");
 
 router.get("/test", (req, res) => {
   res.send("moves test is successful");
 });
-
-// GET ALL MOVES at /moves
-// router.get("/", async (req, res) => {
-//   try {
-//     const moves = await prisma.move.findMany({
-//       include: {
-//         difficulty: true, // Include the 'difficulty' relation
-//         categories: true, // Include the 'category' relation
-//       },
-//     });
-//     res.status(200).json(moves);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Something went wrong! Status 500" });
-//   }
-// });
 
 // NEW GET moves with query parameters
 router.get("/", async (req, res) => {
@@ -94,12 +79,44 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST a new move at /add
+// POST a new move at /add given that the user is logged in
+router.post("/add", verifyToken, async (req, res) => {
+  console.log("making post /moves/add api call");
+  try {
+    const { title, desc, difficulty, categories, alias, proficiencies } =
+      req.body;
+    const userUid = req.user;
 
-router.post("/add", async (req, res) => {
-  const newmove = req.body.newmove;
-  console.log(newmove);
-  res.send("your new move is " + newmove);
+    // Create a new move entry associated with the user
+    const newMove = await prisma.move.create({
+      data: {
+        title,
+        desc,
+        img: "",
+        difficulty: {
+          connect: { id: difficulty }, // Assuming `difficulty` is the ID of the existing difficulty
+        },
+        categories: {
+          connect: categories.map((categoryId) => ({ id: categoryId })), // Assuming `categories` is an array of category IDs
+        },
+
+        creator: {
+          connect: {
+            uid: userUid,
+          },
+        },
+        alias: {
+          create: alias.map((aliasName) => ({ name: aliasName })),
+        },
+        proficiencies,
+      },
+    });
+
+    res.status(201).json(newMove);
+  } catch (error) {
+    console.error("Error adding a new move:", error);
+    res.status(500).json({ message: "Something went wrong!" });
+  }
 });
 
 module.exports = router;

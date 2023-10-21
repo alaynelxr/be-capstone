@@ -10,12 +10,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  uid        String   @unique
+  email      String   @unique
+  displayName String?
+  lists      List[]
+  proficiencies Proficiency[] // one user can have many proficiencies in moves
+  moves         Move[] 
+}
+
 model Category {
   id        String    @id @default(cuid())
   createdAt DateTime  @default(now())
   title     String
   slug      String    @unique
   moves     Move[]    // M:N relationship with Move
+}
+
+model Alias {
+  id       String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  name     String
+ moves Move[]
 }
 
 model Move {
@@ -29,14 +47,27 @@ model Move {
   isFeatured Boolean  @default(false)
   categories Category[]   // M:N relationship with Category
   lists      List[]       // M:N relationship with List
+  alias Alias[]
+  proficiencies Proficiency[]
+  creator     User?  @relation(fields: [creatorId], references: [id])
+  creatorId      String?  
+}
+
+model Proficiency {
+  id       String       @id @default(cuid())
+  level    String
+  moveId   String?      // Define a foreign key for the move associated with this proficiency
+  move     Move?     @relation(fields: [moveId], references: [id]) // Define the relation
+  userId   String?      // Define a foreign key for the user who owns this proficiency
+  user     User?     @relation(fields: [userId], references: [id]) // Define the relation
 }
 
 model List {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   moves     Move[]   // M:N relationship with Move
-  status    String
-  slug      String   @unique
+  user User @relation (fields:[userUid], references:[uid])
+  userUid   String   // Field to store the user's Firebase UID
 }
 
 model Difficulty {
