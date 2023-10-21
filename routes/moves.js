@@ -83,8 +83,7 @@ router.get("/:id", async (req, res) => {
 router.post("/add", verifyToken, async (req, res) => {
   console.log("making post /moves/add api call");
   try {
-    const { title, desc, difficulty, categories, alias, proficiencies } =
-      req.body;
+    const { title, desc, difficulty, categories, alias, level } = req.body;
     const userUid = req.user;
 
     // Create a new move entry associated with the user
@@ -108,7 +107,24 @@ router.post("/add", verifyToken, async (req, res) => {
         alias: {
           create: alias.map((aliasName) => ({ name: aliasName })),
         },
-        proficiencies,
+        // proficiencies,
+      },
+    });
+
+    // Create a new Proficiency entry associated with the user and the newly created move
+    const newProficiency = await prisma.proficiency.create({
+      data: {
+        level: level,
+        move: {
+          connect: {
+            id: newMove.id, // Connect to the newly created move
+          },
+        },
+        user: {
+          connect: {
+            uid: userUid,
+          },
+        },
       },
     });
 
