@@ -53,9 +53,11 @@ router.get("/", async (req, res) => {
 });
 
 // GET ONE MOVE at /move/:id
-router.get("/:id", async (req, res) => {
+router.get("/:id", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
+    const userUid = req.user; // Obtain user's UID from your authentication mechanism (e.g., Firebase Auth)
+    console.log("User UID (Backend):", userUid);
     const move = await prisma.move.findUnique({
       where: {
         id: id,
@@ -69,6 +71,25 @@ router.get("/:id", async (req, res) => {
     if (!move) {
       return res.status(404).json({ message: "Move not found" });
     }
+
+    // this part is new for the proficiency
+    if (userUid) {
+      // User is logged in, fetch their proficiency for this move
+      const userProficiency = await prisma.proficiency.findFirst({
+        where: {
+          // user: userUid,
+          user: {
+            uid: userUid,
+          },
+          moveId: id,
+        },
+      });
+      console.log("User's Proficiency (Backend):", userProficiency);
+      // Include the user's proficiency in the response
+      move.userProficiency = userProficiency;
+    }
+
+    // end of new part
 
     res.status(200).json(move);
   } catch (err) {
