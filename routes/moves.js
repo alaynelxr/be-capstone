@@ -100,6 +100,36 @@ router.get("/:id", verifyToken, async (req, res) => {
   }
 });
 
+// update user's proficiency for a move
+router.patch("/:moveId/updateProficiency", verifyToken, async (req, res) => {
+  const { moveId } = req.params;
+  const { updatedProficiencyLevel } = req.body; // Get the updated proficiency level from the request body
+
+  try {
+    const userUid = req.user; // Obtain the user's UID from your authentication mechanism (e.g., Firebase Auth)
+    console.log(moveId, "moveid");
+    // Use Prisma to update the user's proficiency for this move
+    const updatedProficiency = await prisma.proficiency.update({
+      where: {
+        moveId_userUid: {
+          moveId: moveId,
+          userUid: userUid,
+        },
+      },
+      data: {
+        level: updatedProficiencyLevel,
+      },
+    });
+
+    res.status(200).json(updatedProficiency);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Something went wrong!" });
+  } finally {
+    await prisma.$disconnect(); // Disconnect from the database after the request
+  }
+});
+
 // POST a new move at /add given that the user is logged in
 router.post("/add", verifyToken, async (req, res) => {
   console.log("making post /moves/add api call");
@@ -128,7 +158,6 @@ router.post("/add", verifyToken, async (req, res) => {
         alias: {
           create: alias.map((aliasName) => ({ name: aliasName })),
         },
-        // proficiencies,
       },
     });
 

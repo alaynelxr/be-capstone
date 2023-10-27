@@ -60,6 +60,7 @@ model Proficiency {
   move     Move?     @relation(fields: [moveId], references: [id]) // Define the relation
   userUid   String?      // Define a foreign key for the user who owns this proficiency
   user     User?     @relation(fields: [userUid], references: [uid]) // Define the relation
+    @@unique([moveId, userUid])
 }
 
 model List {

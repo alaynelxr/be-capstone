@@ -32,7 +32,7 @@ const corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  methods: "GET,PUT,POST,DELETE",
+  methods: "GET,PUT,POST,DELETE, PATCH",
   credentials: true, // This option is important if you're dealing with cookies or authentication.
 };
 
