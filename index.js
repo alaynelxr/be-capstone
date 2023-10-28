@@ -17,6 +17,7 @@ const categoriesRoute = require("./routes/categories");
 const movesRoute = require("./routes/moves");
 const listsRoute = require("./routes/lists");
 const usersRoute = require("./routes/users");
+const reportsRoute = require("./routes/reports");
 
 app.listen(PORT, () => {
   console.log(`Backend server is running on port ${PORT}`);
@@ -45,3 +46,4 @@ app.use("/categories", categoriesRoute);
 app.use("/moves", movesRoute);
 app.use("/lists", listsRoute);
 app.use("/users", usersRoute);
+app.use("/reports", reportsRoute);

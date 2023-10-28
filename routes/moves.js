@@ -6,119 +6,6 @@ router.get("/test", (req, res) => {
   res.send("moves test is successful");
 });
 
-// GET moves with query parameters
-// router.get("/", async (req, res) => {
-//   const { query } = req.query;
-
-//   try {
-//     let moves;
-//     if (query) {
-//       moves = await prisma.move.findMany({
-//         where: {
-//           OR: [
-//             {
-//               title: {
-//                 contains: query,
-//                 mode: "insensitive",
-//               },
-//             },
-//             {
-//               aliases: {
-//                 contains: query,
-//                 mode: "insensitive",
-//               },
-//             },
-//           ],
-//         },
-//         include: {
-//           difficulty: true,
-//           categories: true,
-//         },
-//       });
-//     } else {
-//       // If there's no query, return all data
-//       moves = await prisma.move.findMany({
-//         include: {
-//           difficulty: true,
-//           categories: true,
-//         },
-//       });
-//     }
-
-//     res.status(200).json(moves);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Something went wrong! Status 500" });
-//   }
-// });
-
-// new combined
-// router.get("/", verifyToken, async (req, res) => {
-//   const userUid = req.user; // Obtain user's UID from Firebase Auth
-//   const { query } = req.query;
-
-//   let moves;
-//   try {
-//     if (query) {
-//       moves = await prisma.move.findMany({
-//         where: {
-//           OR: [
-//             {
-//               title: {
-//                 contains: query,
-//                 mode: "insensitive",
-//               },
-//             },
-//             {
-//               aliases: {
-//                 contains: query,
-//                 mode: "insensitive",
-//               },
-//             },
-//             {
-//               AND: [
-//                 {
-//                   creatorId: userUid ? userUid : null,
-//                 },
-//                 {
-//                   creatorId: null,
-//                 },
-//               ],
-//             },
-//           ],
-//         },
-//         include: {
-//           difficulty: true,
-//           categories: true,
-//         },
-//       });
-//     } else {
-//       // If there's no query, return all data
-//       moves = await prisma.move.findMany({
-//         where: {
-//           OR: [
-//             {
-//               creatorId: userUid ? userUid : null,
-//             },
-//             {
-//               creatorId: null,
-//             },
-//           ],
-//         },
-//         include: {
-//           difficulty: true,
-//           categories: true,
-//         },
-//       });
-//     }
-
-//     res.status(200).json(moves);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Something went wrong! Status 500" });
-//   }
-// });
-
 // new GET all for signed in
 router.get("/loggedIn", verifyToken, async (req, res) => {
   const userUid = req.user;
@@ -142,8 +29,12 @@ router.get("/loggedIn", verifyToken, async (req, res) => {
             },
             {
               aliases: {
-                contains: query,
-                mode: "insensitive",
+                some: {
+                  name: {
+                    contains: query,
+                    mode: "insensitive",
+                  },
+                },
               },
             },
             {
@@ -161,6 +52,7 @@ router.get("/loggedIn", verifyToken, async (req, res) => {
         include: {
           difficulty: true,
           categories: true,
+          alias: true,
         },
       });
     } else {
@@ -179,6 +71,7 @@ router.get("/loggedIn", verifyToken, async (req, res) => {
         include: {
           difficulty: true,
           categories: true,
+          alias: true,
         },
       });
     }
@@ -220,6 +113,7 @@ router.get("/public", async (req, res) => {
         include: {
           difficulty: true,
           categories: true,
+          alias: true,
         },
       });
     } else {
@@ -231,6 +125,7 @@ router.get("/public", async (req, res) => {
         include: {
           difficulty: true,
           categories: true,
+          alias: true,
         },
       });
     }
@@ -241,51 +136,6 @@ router.get("/public", async (req, res) => {
     res.status(500).json({ message: "Something went wrong! Status 500" });
   }
 });
-
-// GET ONE MOVE at /move/:id
-// router.get("/:id", verifyToken, async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const userUid = req.user; // Obtain user's UID from your authentication mechanism (e.g., Firebase Auth)
-//     console.log("User UID (Backend):", userUid);
-//     const move = await prisma.move.findUnique({
-//       where: {
-//         id: id,
-//       },
-//       include: {
-//         difficulty: true, // Include the 'difficulty' relation
-//         categories: true, // Include the 'category' relation
-//       },
-//     });
-
-//     if (!move) {
-//       return res.status(404).json({ message: "Move not found" });
-//     }
-
-//     if (userUid) {
-//       // User is logged in, fetch their proficiency for this move
-//       const userProficiency = await prisma.proficiency.findFirst({
-//         where: {
-//           // user: userUid,
-//           user: {
-//             uid: userUid,
-//           },
-//           moveId: id,
-//         },
-//       });
-//       console.log("User's Proficiency (Backend):", userProficiency);
-//       // Include the user's proficiency in the response
-//       move.userProficiency = userProficiency;
-//     }
-
-//     res.status(200).json(move);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Something went wrong!" });
-//   } finally {
-//     await prisma.$disconnect(); // Disconnect from the database after the request
-//   }
-// });
 
 // get specific move given user is logged in
 router.get("/:id/loggedIn", verifyToken, async (req, res) => {
@@ -300,6 +150,7 @@ router.get("/:id/loggedIn", verifyToken, async (req, res) => {
       include: {
         difficulty: true,
         categories: true,
+        alias: true,
       },
     });
 
@@ -341,6 +192,7 @@ router.get("/:id/public", async (req, res) => {
       include: {
         difficulty: true,
         categories: true,
+        alias: true,
       },
     });
 
@@ -358,6 +210,7 @@ router.get("/:id/public", async (req, res) => {
 });
 
 // update user's proficiency for a move
+
 router.patch("/:moveId/updateProficiency", verifyToken, async (req, res) => {
   const { moveId } = req.params;
   const { updatedProficiencyLevel } = req.body; // Get the updated proficiency level from the request body
@@ -366,14 +219,19 @@ router.patch("/:moveId/updateProficiency", verifyToken, async (req, res) => {
     const userUid = req.user; // Obtain the user's UID from your authentication mechanism (e.g., Firebase Auth)
     console.log(moveId, "moveid");
     // Use Prisma to update the user's proficiency for this move
-    const updatedProficiency = await prisma.proficiency.update({
+    const updatedProficiency = await prisma.proficiency.upsert({
       where: {
         moveId_userUid: {
           moveId: moveId,
           userUid: userUid,
         },
       },
-      data: {
+      update: {
+        level: updatedProficiencyLevel,
+      },
+      create: {
+        moveId: moveId,
+        userUid: userUid,
         level: updatedProficiencyLevel,
       },
     });
@@ -443,3 +301,52 @@ router.post("/add", verifyToken, async (req, res) => {
 });
 
 module.exports = router;
+
+//  Delete custom move given that user is logged in
+router.delete("/:id/loggedIn", verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userUid = req.user; // Obtain user's UID from your authentication mechanism (e.g., Firebase Auth)
+    console.log(userUid, "userUid");
+    console.log(id, "moveId");
+    // Check if the move exists
+    const move = await prisma.move.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!move) {
+      return res.status(404).json({ message: "Move not found" });
+    }
+
+    // Check if the user has permission to delete the move (based on userId and creatorId)
+    if (userUid) {
+      const user = await prisma.user.findUnique({
+        where: { uid: userUid },
+      });
+
+      if (move.creatorId === user.id) {
+        // If the user is the creator of the move, they can delete it
+        await prisma.move.delete({
+          where: {
+            id: id,
+          },
+        });
+
+        // Optionally, you can handle additional actions here, such as sending a success message.
+        return res.status(200).json({ message: "Move deleted successfully" });
+      }
+    }
+
+    // If the user is not the creator of the move or not found, they don't have permission to delete it.
+    return res
+      .status(403)
+      .json({ message: "You do not have permission to delete this move" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Something went wrong!" });
+  } finally {
+    await prisma.$disconnect();
+  }
+});
