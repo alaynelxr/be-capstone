@@ -249,15 +249,17 @@ router.patch("/:moveId/updateProficiency", verifyToken, async (req, res) => {
 router.post("/add", verifyToken, async (req, res) => {
   console.log("making post /moves/add api call");
   try {
-    const { title, desc, difficulty, categories, alias, level } = req.body;
+    const { title, desc, difficulty, categories, alias, level, img } = req.body;
     const userUid = req.user;
-
+    console.log("Image URL before database save:", img);
+    console.log("title before database save:", title);
+    console.log("level before database save:", level);
     // Create a new move entry associated with the user
     const newMove = await prisma.move.create({
       data: {
         title,
         desc,
-        img: "",
+        img,
         difficulty: {
           connect: { id: difficulty }, // Assuming `difficulty` is the ID of the existing difficulty
         },
@@ -348,5 +350,28 @@ router.delete("/:id/loggedIn", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Something went wrong!" });
   } finally {
     await prisma.$disconnect();
+  }
+});
+
+// get isFeatured moves for the homepage
+router.get("/featured", async (req, res) => {
+  try {
+    // If there's no query, return moves with no creatorId
+    moves = await prisma.move.findMany({
+      where: {
+        creatorId: null,
+        isFeatured: true,
+      },
+      include: {
+        difficulty: true,
+        categories: true,
+        alias: true,
+      },
+    });
+
+    res.status(200).json(moves);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Something went wrong! Status 500" });
   }
 });
