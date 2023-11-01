@@ -1,4 +1,12 @@
 node_modules
 # Keep environment variables out of version control
 .env
-./config/serviceAccount.json
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+/node_modules
+/.pnp
+.pnp.js
+/src/docker/docker-compose.yml
