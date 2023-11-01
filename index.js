@@ -36,7 +36,10 @@ app.listen(PORT, () => {
   console.log(`Backend server is running on port ${PORT}`);
 });
 
-const allowedOrigins = ["http://localhost:3000"]; // Add all the domains you want to allow
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://fe-capstone-cmg5hdkfj-alaynes-projects.vercel.app",
+]; // Add all the domains you want to allow
 const corsOptions = {
   origin: function (origin, callback) {
     // Check if the request's origin is in the allowed list
