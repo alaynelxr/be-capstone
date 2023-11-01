@@ -59,3 +59,8 @@ app.use("/moves", movesRoute);
 app.use("/lists", listsRoute);
 app.use("/users", usersRoute);
 app.use("/reports", reportsRoute);
+
+// testing vercel
+app.use("/", (req, res) => {
+  res.send("Please server work thank you v much");
+});
