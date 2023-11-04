@@ -40,7 +40,7 @@ app.listen(PORT, () => {
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://fe-capstone-cmg5hdkfj-alaynes-projects.vercel.app",
+  "https://fe-capstone-six.vercel.app/",
 ];
 const corsOptions = {
   origin: function (origin, callback) {
