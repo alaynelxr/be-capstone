@@ -1,5 +1,6 @@
 // Import the 'dotenv' package
-require("dotenv").config();
+// require("dotenv").config();
+require("dotenv").config({ path: ".env.local" });
 
 // Access environment variables as usual
 const serviceAccountJSON = process.env.SERVICE_ACCOUNT_JSON;
@@ -31,6 +32,7 @@ const movesRoute = require("./routes/moves");
 const listsRoute = require("./routes/lists");
 const usersRoute = require("./routes/users");
 const reportsRoute = require("./routes/reports");
+const difficultiesRoute = require("./routes/difficulty");
 
 app.listen(PORT, () => {
   console.log(`Backend server is running on port ${PORT}`);
@@ -39,7 +41,7 @@ app.listen(PORT, () => {
 const allowedOrigins = [
   "http://localhost:3000",
   "https://fe-capstone-cmg5hdkfj-alaynes-projects.vercel.app",
-]; // Add all the domains you want to allow
+];
 const corsOptions = {
   origin: function (origin, callback) {
     // Check if the request's origin is in the allowed list
@@ -62,6 +64,7 @@ app.use("/moves", movesRoute);
 app.use("/lists", listsRoute);
 app.use("/users", usersRoute);
 app.use("/reports", reportsRoute);
+app.use("/difficulties", difficultiesRoute);
 
 // testing vercel
 app.use("/", (req, res) => {
